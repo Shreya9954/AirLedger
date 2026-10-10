@@ -44,6 +44,8 @@ python3 -m http.server 8000
 # open http://localhost:8000
 ```
 
+**Hosted:** every push to `main` publishes `frontend/` to GitHub Pages at https://shreya9954.github.io/Contrails/ (simulated night only; there is no backend there).
+
 **With the backend:**
 
 ```sh
