@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Upper Air Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="mark">Upper <i>Air</i> Ledger</div>
+    <nav aria-label="Sections">
+      <a href="#map-sec">Contrail map</a>
+      <a href="#score">One score</a>
+      <a href="#ledger">Airline ledger</a>
+      <a href="#lab">Cloud or contrail</a>
+      <a href="#data">Data</a>
+    </nav>
+    <div class="feed" id="feed"><b>●</b> LOADING…</div>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+  <section class="hero" aria-label="Introduction">
+    <p class="big" aria-hidden="true">2%</p>
+    <div>
+      <h1>A small share of flights makes most contrail warming. A 2,000&nbsp;ft change often avoids it.</h1>
+      <p class="lede">Contrails that persist in ice-supersaturated air spread into heat-trapping cirrus. This map forecasts where that air sits tonight, which flights will cross it, what an altitude change would cost in fuel, and how rocket launches and satellite re-entries compare on the same scale.</p>
+      <p class="cite">About 2% of flights produced 80% of contrail energy forcing over Japanese airspace (Teoh et al., 2020, Environ. Sci. Technol.).</p>
+    </div>
+    <div class="audiences">
+      <a href="#map-sec"><b>Flight operations &amp; sustainability</b><span>Find tonight's warming flights and price the reroute.</span></a>
+      <a href="#score"><b>Regulators &amp; researchers</b><span>Compare aviation and space on one metric.</span></a>
+      <a href="#ledger"><b>Journalists &amp; watchdogs</b><span>See which carriers and aircraft types cause it.</span></a>
+    </div>
+  </section>
+
+  <div class="console" id="map-sec">
+    <div class="mapcol">
+      <div class="bar">
+        <span class="lbl">Flight level</span>
+        <div class="seg" id="fls" role="group" aria-label="Flight level for the humidity layer"></div>
+        <div class="toggles">
+          <label><input type="checkbox" id="L-issr" checked> Ice-supersaturated air</label>
+          <label><input type="checkbox" id="L-con" checked> Contrails</label>
+          <label><input type="checkbox" id="L-space" checked> Launches &amp; re-entries</label>
+        </div>
+      </div>
+      <div class="canvas-wrap" id="cwrap">
+        <canvas id="map" aria-label="Map of the North Atlantic showing ice-supersaturated regions, flights, contrails, launches and satellite re-entries. Click a flight to inspect it."></canvas>
+      </div>
+      <div class="time">
+        <button class="btn" id="play" type="button">Pause</button>
+        <span class="clock" id="clock">02:00Z</span>
+        <input type="range" id="time" min="0" max="12" step="0.01" value="5" aria-label="Simulated time, 21:00 to 09:00 UTC">
+      </div>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--ice);opacity:.6;height:10px"></i>Ice-supersaturated at selected level</span>
+        <span><i class="sw" style="background:var(--heat)"></i>Warming contrail (thicker = older, spreading)</span>
+        <span><i class="sw" style="background:var(--cool)"></i>Net-cooling contrail (daytime)</span>
+        <span><i class="sw" style="background:var(--magenta);height:8px;width:8px"></i>Flight inside ISSR now</span>
+        <span><i class="sw" style="background:var(--orbit);height:8px;width:8px;border-radius:50%"></i>Launch or re-entry</span>
+      </div>
+    </div>
+    <aside class="rail" id="rail" aria-live="polite"></aside>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="sheet" id="score">
+    <div class="margin"><span class="lbl">Regulators · researchers</span><span class="code">One score</span></div>
+    <div class="body">
+      <h2>Flights, launches and re-entries on a single climate scale</h2>
+      <p>Every event is converted to tonnes of CO₂-equivalent over 100 years. Contrail energy forcing from pycontrails is divided by the absolute global warming potential of a tonne of CO₂. Rocket particles get their own term with wide uncertainty. The bars show the central estimate and the plausible range, on a log scale.</p>
+      <div class="formula">Impact<sub>tCO₂e,100</sub> = CO₂ from fuel + <em>EF<sub>contrail</sub> ÷ AGWP<sub>CO₂</sub></em> + stratospheric particle term</div>
+      <div class="scorechart" id="scorechart"></div>
+      <p class="readout" id="readout">Hover or focus a row for its assumptions.</p>
+    </div>
+  </section>
+
+  <section class="sheet" id="ledger">
+    <div class="margin"><span class="lbl">Journalists · watchdogs</span><span class="code">Ledger</span></div>
+    <div class="body">
+      <h2>Who made tonight's contrails</h2>
+      <p>Each detected contrail is matched to the aircraft whose wind-advected track lines up with it, so warming can be attributed to a carrier and an aircraft type. "Avoidable" is the warming removed by each flight's best altitude option, after subtracting the extra fuel CO₂.</p>
+      <div class="ledger-tools">
+        <span class="lbl">Group by</span>
+        <div class="seg" role="group" aria-label="Group ledger by">
+          <button type="button" id="g-carrier" aria-pressed="true">Carrier</button>
+          <button type="button" id="g-type" aria-pressed="false">Aircraft type</button>
+        </div>
+        <button class="btn ghost" type="button" id="copycsv">Copy as CSV</button>
+        <span class="muted" id="copymsg" role="status"></span>
+      </div>
+      <div class="tablebox"><table class="ledger" id="ledgertable"></table></div>
+      <p class="note">Carriers here are fictional placeholders for the simulated feed. Live operation attributes contrails to real operators from OpenSky ICAO24 transponder codes.</p>
+    </div>
+  </section>
+
+  <section class="sheet" id="lab">
+    <div class="margin"><span class="lbl">Stretch goal · ML</span><span class="code">Cloud or contrail?</span></div>
+    <div class="body">
+      <h2>Telling a contrail from natural cirrus by its shape and its aircraft</h2>
+      <p>Satellite patches in ash false-colour, where thin ice cloud shows dark blue. The placeholder classifier uses two cues: how straight the feature is, and whether an advected flight track sits on top of it. The planned model is a segmentation network trained on Google's labelled OpenContrails set (GOES-16). Old contrails that have spread and curled are the hard case, and this rule misses some of them.</p>
+      <div class="ledger-tools"><button class="btn ghost" type="button" id="resample">New satellite patches</button><span class="muted mono" style="font-size:.74rem">dashed line = advected flight track</span></div>
+      <div class="tiles" id="tiles"></div>
+    </div>
+  </section>
+
+  <section class="sheet" id="data">
+    <div class="margin"><span class="lbl">Build</span><span class="code">Data</span></div>
+    <div class="body">
+      <h2>Five sources, one pipeline</h2>
+      <div style="overflow-x:auto">
+        <table class="sources">
+          <thead><tr><th>Source</th><th>What it gives us</th><th>Feeds</th></tr></thead>
+          <tbody>
+            <tr><td>OpenSky Network</td><td>Aircraft positions, altitudes, ICAO24 codes and flight corridors</td><td>Flight tracks, carrier and type attribution</td></tr>
+            <tr><td>Contrails.org API</td><td>Detected contrails with geometry, persistence observations and flight attributions where available</td><td>Ground truth for the map; validation of attribution</td></tr>
+            <tr><td>Google Research contrail datasets</td><td>Labelled satellite imagery (OpenContrails, GOES-16 ABI)</td><td>Training the cloud-vs-contrail model</td></tr>
+            <tr><td>Copernicus ERA5</td><td>Temperature, humidity and wind on pressure levels at cruise altitude</td><td>Ice-supersaturation layer, contrail drift</td></tr>
+            <tr><td>pycontrails</td><td>CoCiP contrail model: formation, lifetime, energy forcing</td><td>Warming per flight, reroute options, the shared score</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul class="caveats">
+        <li><b>Everything on this page is simulated.</b> The humidity field, flights, carriers and space events are generated to show how the tool behaves.</li>
+        <li>Contrail formation assumes the Schmidt–Appleman criterion is met at every level above FL300, which is usually but not always true.</li>
+        <li>Energy forcing per km is a rough stand-in for CoCiP output: strong at night, weaker or net-cooling in midday sun, scaled by humidity and aircraft type.</li>
+        <li>AGWP<sub>CO₂</sub> over 100 years is taken as 1.48 × 10¹² J per tonne. Contrail efficacy is not applied.</li>
+        <li>Rocket and re-entry values are illustrative placeholders. Black carbon and alumina in the stratosphere are not yet well quantified, which is why their ranges span an order of magnitude.</li>
+        <li>Reroutes change altitude only across the humid stretch plus 100 km either side, using the semicircular flight-level rule.</li>
+      </ul>
+    </div>
+  </section>
+  <footer>Upper Air Ledger · prototype · 10 October 2026</footer>
+</div>
+</main>
+</body>
+</html>
