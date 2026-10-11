@@ -1,0 +1,8 @@
+#Code	UCode	StateCode	Type	Class	TStart	TStop	ShortName	Name	Location	Longitude	Latitude	Error	Parent	ShortEName	EName	UName
+# Updated 2026 Oct  9 1759:22
+AFSSD	AFWDD	US	O	D	1961 Apr  1	1967 Jul	USAF SSD	US Air Force Space Systems Division	El Segundo, California	   -118.4100 	   33.9200 	0.0200 	AFSC	-	-	US Air Force Space Systems Division
+AFSSD2	AFWDD	US	O	D	1989 Mar	1992 Jul	USAF SSD	US Air Force Space Systems Division	El Segundo, California	   -118.4100 	   33.9200 	0.0200 	USAF	-	-	US Air Force Space Systems Division
+GSFC	GSFC	US	O/LA/LV/PL/S	C	1959 May  1	*	GSFC	NASA Goddard Space Flight Center	Greenbelt, Maryland	    -76.8900 	   38.9900 	0.0200 	NASA	-	-	NASA Goddard Space Flight Center
+JSC	JSC	US	O/LA/PL/S	C	1973 Feb 17	-	NASA JSC	NASA Johnson Space Flight Center	Houston:Clear Lake, Texas	    -95.1200 	   29.5600 	0.0200 	NASA	-	-	NASA Johnson Space Flight Center
+MDAC	DACHB	US	O/LA/LV/PL/E/S	B	1967	1996 Dec	MDAC-HB	McDonnell Douglas Astronautics Co.	Huntington Beach, California	   -118.0000 	   33.6900 	0.0200 	MDC	-	McDonnell Douglas Astronautics/HB	McDonnell Douglas Astronautics Co.
+SPXS	SPXS	US	O/PL	B	2015 Jun	-	SpaceX/Seattle	SpaceX (Seattle)	Seattle:Redmond, Washington	   -122.1200 	   47.6700 	0.0200 	-	-	-	SpaceX (Seattle)

@@ -1,5 +1,7 @@
 # Handoff: Upper Air Ledger → Contrails API + calibrated avoidance
 
+> **Shelved 2026-10-11.** The user judged per-flight contrail forecasts too unreliable to build on. The active plan is the space ledger in [SPACE_HANDOFF.md](SPACE_HANDOFF.md). This file is kept for background only.
+
 Context for a Claude session continuing this work. Written 2026-10-11, summarising a planning conversation with the user. **No code has been written yet.** The user has been asked "Should I start with the demo-mode version?" several times and has not yet said yes. Confirm before implementing.
 
 ## 1. The user and the goal
