@@ -88,7 +88,7 @@
     <div class="margin"><span class="lbl">Journalists · watchdogs</span><span class="code">Ledger</span></div>
     <div class="body">
       <h2>Who made tonight's contrails</h2>
-      <p>Each detected contrail is matched to the aircraft whose wind-advected track lines up with it, so warming can be attributed to a carrier and an aircraft type. "Avoidable" is the warming removed by each flight's best altitude option, after subtracting the extra fuel CO₂.</p>
+      <p>Contrail warming here is the contrail model's prediction for each flight, totalled by carrier or aircraft type. Satellite detections of contrails are matched to the aircraft whose wind-advected track lines up with them; "Confirmed" counts the flights with at least one match, so you can see how much of the predicted warming has been observed. "Avoidable" is the warming removed by each flight's best altitude option, after subtracting the extra fuel CO₂.</p>
       <div class="ledger-tools">
         <span class="lbl">Group by</span>
         <div class="seg" role="group" aria-label="Group ledger by">
@@ -99,7 +99,7 @@
         <span class="muted" id="copymsg" role="status"></span>
       </div>
       <div class="tablebox"><table class="ledger" id="ledgertable"></table></div>
-      <p class="note">Carriers here are fictional placeholders for the simulated feed. Live operation attributes contrails to real operators from OpenSky ICAO24 transponder codes.</p>
+      <p class="note" id="ledger-note"></p>
     </div>
   </section>
 
@@ -107,7 +107,7 @@
     <div class="margin"><span class="lbl">Stretch goal · ML</span><span class="code">Cloud or contrail?</span></div>
     <div class="body">
       <h2>Telling a contrail from natural cirrus by its shape and its aircraft</h2>
-      <p>Satellite patches in ash false-colour, where thin ice cloud shows dark blue. The placeholder classifier uses two cues: how straight the feature is, and whether an advected flight track sits on top of it. The planned model is a segmentation network trained on Google's labelled OpenContrails set (GOES-16). Old contrails that have spread and curled are the hard case, and this rule misses some of them.</p>
+      <p>Simulated satellite patches in ash false-colour, where thin ice cloud shows dark blue. Each tile is measured from its own pixels: the largest region of thin ice cloud, how straight it is (from the principal axes of its pixels), its width, and how far the nearest advected flight track lies from it. A two-rule classifier then decides: straight means contrail, and a track within 10 km attributes it. There is no trained model yet; the planned one is a segmentation network trained on Google's labelled OpenContrails set (GOES-16). Streaky cirrus and contrails crossing cirrus are the hard cases, and the rule misses some of them.</p>
       <div class="ledger-tools"><button class="btn ghost" type="button" id="resample">New satellite patches</button><span class="muted mono" style="font-size:.74rem">dashed line = advected flight track</span></div>
       <div class="tiles" id="tiles"></div>
     </div>
@@ -121,18 +121,19 @@
         <table class="sources">
           <thead><tr><th>Source</th><th>What it gives us</th><th>Feeds</th></tr></thead>
           <tbody>
-            <tr><td>OpenSky Network</td><td>Aircraft positions, altitudes, ICAO24 codes and flight corridors</td><td>Flight tracks, carrier and type attribution</td></tr>
-            <tr><td>Contrails.org API</td><td>Detected contrails with geometry, persistence observations and flight attributions where available</td><td>Ground truth for the map; validation of attribution</td></tr>
-            <tr><td>Google Research contrail datasets</td><td>Labelled satellite imagery (OpenContrails, GOES-16 ABI)</td><td>Training the cloud-vs-contrail model</td></tr>
+            <tr><td>OpenSky Network</td><td>Aircraft positions, altitudes, ICAO24 codes, and an aircraft database mapping each code to type and operator</td><td>Flight tracks; carrier and aircraft type for the ledger</td></tr>
+            <tr><td>Contrails.org API</td><td>Contrail line segments detected in GOES-East satellite images every 10 minutes</td><td>Matching observed contrails to flights, which confirms or contradicts the model's predictions</td></tr>
+            <tr><td>Google Research contrail datasets</td><td>Labelled satellite imagery (OpenContrails, GOES-16 ABI)</td><td>Evaluating the shape rule now; training a segmentation model later (not trained yet)</td></tr>
             <tr><td>Copernicus ERA5</td><td>Temperature, humidity and wind on pressure levels at cruise altitude</td><td>Ice-supersaturation layer, contrail drift</td></tr>
             <tr><td>pycontrails</td><td>CoCiP contrail model: formation, lifetime, energy forcing</td><td>Warming per flight, reroute options, the shared score</td></tr>
           </tbody>
         </table>
       </div>
       <ul class="caveats">
-        <li><b>Everything on this page is simulated.</b> The humidity field, flights, carriers and space events are generated to show how the tool behaves.</li>
-        <li>Contrail formation assumes the Schmidt–Appleman criterion is met at every level above FL300, which is usually but not always true.</li>
-        <li>Energy forcing per km is a rough stand-in for CoCiP output: strong at night, weaker or net-cooling in midday sun, scaled by humidity and aircraft type.</li>
+        <li data-mode="demo"><b>Everything on this page is simulated.</b> The humidity field, flights, carriers, satellite detections and space events are generated to show how the tool behaves.</li>
+        <li data-mode="demo">Contrail formation assumes the Schmidt–Appleman criterion is met at every level above FL300, which is usually but not always true.</li>
+        <li data-mode="demo">Energy forcing per km is a rough stand-in for CoCiP output: strong at night, weaker or net-cooling in midday sun, scaled by humidity and aircraft type.</li>
+        <li data-mode="live" hidden><b>Flights are real; their contrails are modeled.</b> Tracks and operators come from OpenSky, humidity and wind from ERA5, and contrail formation, lifetime and energy forcing from pycontrails CoCiP.</li>
         <li>AGWP<sub>CO₂</sub> over 100 years is taken as 1.48 × 10¹² J per tonne. Contrail efficacy is not applied.</li>
         <li>Rocket and re-entry values are illustrative placeholders. Black carbon and alumina in the stratosphere are not yet well quantified, which is why their ranges span an order of magnitude.</li>
         <li>Reroutes change altitude only across the humid stretch plus 100 km either side, using the semicircular flight-level rule.</li>

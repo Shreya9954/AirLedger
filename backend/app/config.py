@@ -27,8 +27,9 @@ class Settings:
     opensky_client_secret: str = field(default_factory=lambda: _env("OPENSKY_CLIENT_SECRET"))
     opensky_aircraft_db: Path = field(default_factory=lambda: Path(_env("OPENSKY_AIRCRAFT_DB", "data/aircraftDatabase.csv")))
 
-    contrails_org_url: str = field(default_factory=lambda: _env("CONTRAILS_ORG_URL"))
+    contrails_org_url: str = field(default_factory=lambda: _env("CONTRAILS_ORG_URL", "https://api.contrails.org"))
     contrails_org_key: str = field(default_factory=lambda: _env("CONTRAILS_ORG_KEY"))
+    obs_step_min: int = field(default_factory=lambda: int(_env("UAL_OBS_STEP_MIN", "30")))  # minutes between satellite images
 
     cache_dir: Path = field(default_factory=lambda: Path(_env("UAL_CACHE_DIR", ".cache")))
 

@@ -3,6 +3,8 @@
 import { simAtmosphere } from './sim/atmosphere.js';
 import { simFleet } from './sim/fleet.js';
 import { SPACE_EVENTS } from './sim/space.js';
+import { attributeDetections, simDetections } from './attribution.js';
+import { D2R } from './util.js';
 
 const API = '/api';
 
@@ -38,15 +40,27 @@ export async function loadScenario() {
       const sc = await getJSON('/scenario', 120000);
       return {
         source: 'live', label: sc.label, startHour: sc.start_hour, hours: sc.hours,
-        atmos: gridAtmosphere(sc.atmosphere), flights: sc.flights, space: sc.space_events
+        atmos: gridAtmosphere(sc.atmosphere), flights: sc.flights, space: sc.space_events,
+        detections: sc.observations == null ? null : { total: sc.observations, matchedFlights: sc.flights.filter(f => f.attribution).length }
       };
     }
   } catch (err) {
     console.info('Backend unavailable, using simulated feed:', err.message);
   }
-  const startHour = 21, atmos = simAtmosphere();
+  const startHour = 21, hours = 12, atmos = simAtmosphere(), flights = simFleet(atmos, startHour);
   return {
-    source: 'demo', label: 'N. ATLANTIC · 10–11 OCT 2026', startHour, hours: 12,
-    atmos, flights: simFleet(atmos, startHour), space: SPACE_EVENTS
+    source: 'demo', label: 'N. ATLANTIC · 10–11 OCT 2026', startHour, hours,
+    atmos, flights, space: SPACE_EVENTS, detections: simulatedAttribution(flights, atmos, hours)
   };
+}
+
+// Run the attribution matcher on simulated detections and report how often it picked the flight
+// that actually made each one (the matcher never sees that answer).
+function simulatedAttribution(flights, atmos, hours) {
+  const dets = simDetections(flights, atmos, hours);
+  const wind = (lon, lat) => [atmos.wind * 111320 * Math.cos(lat * D2R) / 3600, 0];
+  const { best, assigned } = attributeDetections(dets, flights, wind);
+  for (const f of flights) f.attribution = best.get(f.id) ?? null;
+  const correct = dets.filter(d => assigned.get(d.id) === d.source).length;
+  return { total: dets.length, matched: assigned.size, correct, matchedFlights: best.size };
 }

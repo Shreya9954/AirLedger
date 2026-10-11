@@ -3,7 +3,8 @@ import { AGWP_CO2, CO2_PER_FUEL, typeName } from '../config.js';
 import { fmt } from '../util.js';
 
 const COLS = [
-  { k: 'name', t: 'Name' }, { k: 'n', t: 'Flights' }, { k: 'pct', t: 'Formed persistent contrail' },
+  { k: 'name', t: 'Name' }, { k: 'n', t: 'Flights' }, { k: 'pct', t: 'Predicted persistent contrail' },
+  { k: 'conf', t: 'Confirmed by satellite' },
   { k: 'ct', t: 'Contrail warming tCO₂e' }, { k: 'co2', t: 'Fuel CO₂ t' }, { k: 'ratio', t: 'Contrail ÷ CO₂' },
   { k: 'av', t: 'Avoidable tCO₂e (net)' }, { k: 'pen', t: 'Extra fuel CO₂ to avoid, t' }
 ];
@@ -12,9 +13,9 @@ export function aggregate(flights, groupBy) {
   const m = new Map();
   for (const f of flights) {
     const key = groupBy === 'carrier' ? f.carrier.name : f.type + ' · ' + typeName(f.type);
-    if (!m.has(key)) m.set(key, { name: key, n: 0, cf: 0, ct: 0, co2: 0, av: 0, pen: 0 });
+    if (!m.has(key)) m.set(key, { name: key, n: 0, cf: 0, conf: 0, ct: 0, co2: 0, av: 0, pen: 0 });
     const r = m.get(key);
-    r.n++; if (f.base.km > 0) r.cf++;
+    r.n++; if (f.base.km > 0) r.cf++; if (f.attribution) r.conf++;
     r.ct += f.base.ef / AGWP_CO2; r.co2 += f.fuel * CO2_PER_FUEL;
     const b = f.opts.best; if (b.net > 0) { r.av += b.net; r.pen += b.extraCO2; }
   }
@@ -31,7 +32,7 @@ export function initLedger({ table, carrierBtn, typeBtn, copyBtn, copyMsg }, sc)
     const rs = rows(), maxCt = Math.max(...rs.map(r => r.ct));
     const head = COLS.map(c => `<th ${c.k === sortKey ? 'aria-sort="descending"' : ''}><button type="button" data-k="${c.k}">${c.k === 'name' ? (groupBy === 'carrier' ? 'Carrier' : 'Aircraft type') : c.t}</button></th>`).join('');
     const body = rs.map(r => `<tr>
-      <td>${r.name}</td><td>${r.n}</td><td>${fmt(100 * r.pct)}%</td>
+      <td>${r.name}</td><td>${r.n}</td><td>${fmt(100 * r.pct)}%</td><td>${r.conf} of ${r.cf}</td>
       <td><span class="barcell"><span class="b" style="width:${Math.max(2, 70 * r.ct / maxCt)}px"></span>${fmt(r.ct)}</span></td>
       <td>${fmt(r.co2)}</td><td>${fmt(100 * r.ratio)}%</td><td>${fmt(r.av)}</td><td>${fmt(r.pen, 1)}</td></tr>`).join('');
     table.innerHTML = `<thead><tr>${head}</tr></thead><tbody>${body}</tbody>`;
@@ -50,8 +51,8 @@ export function initLedger({ table, carrierBtn, typeBtn, copyBtn, copyMsg }, sc)
   copyBtn.addEventListener('click', () => {
     const rs = rows();
     const csv = [
-      'group,flights,contrail_flight_share,contrail_tco2e,fuel_co2_t,contrail_to_co2,avoidable_net_tco2e,extra_fuel_co2_t',
-      ...rs.map(r => [`"${r.name}"`, r.n, r.pct.toFixed(3), r.ct.toFixed(1), r.co2.toFixed(1), r.ratio.toFixed(3), r.av.toFixed(1), r.pen.toFixed(1)].join(','))
+      'group,flights,predicted_contrail_flight_share,confirmed_flights,contrail_tco2e,fuel_co2_t,contrail_to_co2,avoidable_net_tco2e,extra_fuel_co2_t',
+      ...rs.map(r => [`"${r.name}"`, r.n, r.pct.toFixed(3), r.conf, r.ct.toFixed(1), r.co2.toFixed(1), r.ratio.toFixed(3), r.av.toFixed(1), r.pen.toFixed(1)].join(','))
     ].join('\n');
     navigator.clipboard.writeText(csv).then(
       () => { copyMsg.textContent = `Copied ${rs.length} rows (${sc.source === 'live' ? 'live' : 'simulated'} data).`; },

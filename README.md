@@ -18,6 +18,7 @@ upper-air-ledger/
 │       ├── geo.js            Map bounds, coastlines, airports
 │       ├── model.js          Contrail EF, track evaluation, reroute options (demo mode)
 │       ├── data.js           Loads a scenario from the API, else simulates one
+│       ├── attribution.js    Matches satellite contrail detections to flights (mirrors the backend)
 │       ├── sim/              Simulated humidity field, fleet, space events
 │       └── ui/               map, rail (flight + reroute), score, ledger, lab, theme
 └── backend/                  FastAPI service
@@ -27,10 +28,11 @@ upper-air-ledger/
     │   ├── constants.py      AGWP, fuel→CO₂, reroute options, aircraft ceilings
     │   ├── scoring.py        The shared tCO₂e score
     │   ├── space_events.py   Launch / re-entry table (illustrative values)
-    │   ├── sources/          OpenSky, ERA5 (via pycontrails), Contrails.org clients
-    │   └── pipeline/         scenario builder, CoCiP runner, humidity grid,
-    │                         reroute options, contrail→flight attribution
-    ├── ml/                   Stretch goal: OpenContrails loader, shape features, rule classifier
+    │   ├── sources/          OpenSky, ERA5 (via pycontrails), Contrails.org GOES detections
+    │   └── pipeline/         scenario builder, CoCiP runner, humidity grid, reroute options,
+    │                         cruise wind, contrail→flight attribution of satellite detections
+    ├── ml/                   Stretch goal: OpenContrails loader, shape features, rule classifier,
+    │                         and `python -m ml.evaluate <records>` to score the rule on real records
     └── tests/                pytest suite for scoring, reroute, attribution, shape features
 ```
 
@@ -71,11 +73,11 @@ cd backend
 
 | Source | Used for | Setup |
 |---|---|---|
-| OpenSky Network | Aircraft tracks, origin/destination, ICAO24 for attribution | API client credentials in `.env`; download `aircraftDatabase.csv` to `backend/data/` for aircraft types |
+| OpenSky Network | Aircraft tracks, origin/destination, ICAO24 → aircraft type and operator | API client credentials in `.env`. Aircraft database (90 MB, not in git): `curl -o backend/data/aircraftDatabase.csv https://s3.opensky-network.org/data-samples/metadata/aircraftDatabase.csv` |
 | Copernicus ERA5 | Temperature, humidity and winds at cruise levels | CDS account; key in `.env` or `~/.cdsapirc`. ERA5 lags about 5 days, so use ECMWF HRES for tonight's forecast |
 | pycontrails (CoCiP) | Contrail formation, lifetime, energy forcing; PS model fuel burn | `pip install pycontrails[ecmwf]` |
-| Contrails.org API | Observed contrails for validation and attribution | Base URL and key in `.env`. **The client's endpoint path and fields are placeholders; check them against the API docs** |
-| Google OpenContrails | Training data for the cloud-vs-contrail model | Download records, then use `backend/ml/opencontrails.py` |
+| Contrails.org API | Contrail line segments detected in GOES-East images (`/v1/observations/contrails-org/goes/L2/segments`), matched to flights by wind advection | `CONTRAILS_ORG_KEY` in `.env` (from api@contrails.org, sent as `x-api-key`). Without it, live mode still runs and the page says satellite confirmation is off. The provider marks this endpoint experimental |
+| Google OpenContrails | Scoring the shape rule now; training data for a future model | Download records, then `cd backend && .venv/bin/python -m ml.evaluate <folder>` |
 
 The live pipeline (`pipeline/scenario.py`, `pipeline/cocip.py`, `pipeline/humidity_grid.py`, `sources/*`) has not been run against the real services yet. Expect to adjust variable names or API details on the first run. Unit tests cover only the pure logic.
 

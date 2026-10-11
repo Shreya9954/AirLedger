@@ -24,7 +24,7 @@ def health() -> dict:
         "sources": {
             "opensky": bool(settings.opensky_client_id),
             "aircraft_db": settings.opensky_aircraft_db.exists(),
-            "contrails_org": bool(settings.contrails_org_url),
+            "contrails_org": bool(settings.contrails_org_key),
         },
     }
 

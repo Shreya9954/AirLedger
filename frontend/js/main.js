@@ -13,6 +13,16 @@ const $ = id => document.getElementById(id);
 const sc = await loadScenario();
 
 $('feed').innerHTML = (sc.source === 'live' ? '<b>●</b> LIVE · ' : '<b>●</b> SIMULATED FEED · ') + sc.label;
+for (const li of document.querySelectorAll('[data-mode]')) li.hidden = li.dataset.mode !== sc.source;
+$('ledger-note').textContent = ledgerNote(sc);
+
+function ledgerNote(sc) {
+  const d = sc.detections;
+  if (sc.source === 'demo') return `Carriers are fictional. The ${d.total} satellite detections are simulated from the model's own contrails with a few km of position error, then matched blind: ${d.correct} of ${d.total} went to the flight that made them. Mismatches happen where two flights' drifted tracks overlap.`;
+  const base = 'Operators come from the OpenSky aircraft database (unknown when an aircraft is not in it).';
+  return d == null ? `${base} Satellite confirmation is off: set CONTRAILS_ORG_KEY to match GOES detections from Contrails.org.`
+    : `${base} ${d.total} GOES contrail detections from Contrails.org were checked; ${d.matchedFlights} flights matched at least one.`;
+}
 
 // Open on the flight with the most contrail warming, at the middle of its humid stretch.
 const worst = sc.flights.reduce((a, b) => (b.base.ef > a.base.ef ? b : a));

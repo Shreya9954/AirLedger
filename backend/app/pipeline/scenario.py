@@ -8,12 +8,15 @@ from datetime import timedelta
 from ..config import Settings
 from ..constants import AIRCRAFT, CO2_PER_FUEL, DEFAULT_CEILING, N_WAYPOINTS
 from ..space_events import SPACE_EVENTS
+from ..sources.contrails_org import ContrailsOrgClient
 from ..sources.era5 import load_met
 from ..sources.opensky import AircraftDatabase, OpenSkyClient, cruising_aircraft
 from . import cocip
 from .geometry import haversine_km, resample
 from .humidity_grid import build_grid
+from .observed import attribute_observations
 from .reroute import build_options
+from .wind import wind_from_met
 
 log = logging.getLogger(__name__)
 
@@ -33,6 +36,8 @@ def build_live_scenario(s: Settings) -> dict:
 
     log.info("Fetching aircraft from OpenSky")
     client = OpenSkyClient(s.opensky_client_id, s.opensky_client_secret)
+    if not s.opensky_aircraft_db.exists():
+        log.warning("%s is missing: aircraft types and operators will be unknown (see .env.example)", s.opensky_aircraft_db)
     db = AircraftDatabase(s.opensky_aircraft_db)
     aircraft = cruising_aircraft(client, db, s.bbox, at=mid, limit=s.max_flights)
 
@@ -75,13 +80,35 @@ def build_live_scenario(s: Settings) -> dict:
             "base": {"iss": base.issr, "km": base.km, "ef": base.ef}, "opts": opts,
         })
 
+    n_obs = attach_attributions(s, met, flights) if s.contrails_org_key else None
+
     return {
         "label": f"LIVE · {start:%d %b %Y %H:%MZ} + {s.hours} H".upper(),
         "start_hour": start.hour + start.minute / 60, "hours": s.hours,
         "atmosphere": build_grid(met, start, s.hours, s.bbox),
         "flights": flights,
         "space_events": SPACE_EVENTS,
+        "observations": n_obs,  # satellite detections fetched; None when Contrails.org is not configured
     }
+
+
+def attach_attributions(s: Settings, met, flights: list[dict]) -> int:
+    """Fetch GOES contrail detections for the window, match each to a flight by wind advection, and
+    set flight["attribution"] on the flights that made one. Returns the number of detections."""
+    start, end = s.start, s.start + timedelta(hours=s.hours)
+    client = ContrailsOrgClient(s.contrails_org_key, s.contrails_org_url)
+    detections = client.segments_between(start, end, s.bbox, step_min=s.obs_step_min)
+    log.info("Contrails.org: %d detections in the window", len(detections))
+    if not detections:
+        return 0
+    wind = wind_from_met(met, start)
+    tracks = {f["id"]: [tuple(p) for p in f["pts"]] for f in flights}
+    obs = [(d.id, (d.observed_at - start).total_seconds() / 3600, d.line) for d in detections]
+    matches = attribute_observations(obs, tracks, wind)
+    for f in flights:
+        f["attribution"] = matches.get(f["id"])
+    log.info("Attributed detections to %d flights", len(matches))
+    return len(detections)
 
 
 def cached_scenario(s: Settings) -> dict:

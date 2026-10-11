@@ -19,11 +19,19 @@ export function createRail(el, sc, state) {
       : '<span class="pill calm">AIRBORNE · CLEAR AIR</span>';
   }
 
+  // Satellite detection matched to this flight, if any (live: GOES via Contrails.org; demo: simulated).
   function attribution(f) {
     if (!f.base.km) return '<div class="attrib">No persistent contrail expected on this route tonight.</div>';
-    const a = f.attribution ?? { id: 'CT-' + (4000 + f.id * 37) % 9999, offset_km: 1.5 + (f.id % 7) * 0.9, confidence: (88 + (f.id % 10)) / 100 };
-    return `<div class="attrib">Contrail <b>${a.id}</b> matched to this aircraft after wind advection.<br>
-      <span class="mono">offset ${a.offset_km.toFixed(1)} km · age ≤ 90 min · confidence ${a.confidence.toFixed(2)}</span></div>`;
+    const a = f.attribution;
+    if (!a) {
+      const why = sc.detections == null ? 'Satellite matching is off: no Contrails.org key is configured.'
+        : `None of the ${fmt(sc.detections.total)} ${sc.source === 'demo' ? 'simulated ' : ''}satellite detections tonight matched this flight.`;
+      return `<div class="attrib">Contrail predicted by the model, not confirmed by a satellite detection.<br><span class="mono">${why}</span></div>`;
+    }
+    const kind = a.simulated ? 'Simulated satellite detection' : 'GOES satellite detection';
+    const more = a.n_matched > 1 ? ` · ${a.n_matched} detections matched` : '';
+    return `<div class="attrib">${kind} <b>${a.id}</b> at ${hhmm(a.observed_h, sc.startHour)} matched to this aircraft after wind advection.<br>
+      <span class="mono">offset ${a.offset_km.toFixed(1)} km · contrail age ${a.age_min} min · confidence ${a.confidence.toFixed(2)}${more}</span></div>`;
   }
 
   function reroute(f, co2) {
