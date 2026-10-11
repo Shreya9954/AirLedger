@@ -9,6 +9,7 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 
 from .config import settings
+from .space.api import router as space_router
 from .space_events import SPACE_EVENTS
 
 logging.basicConfig(level=logging.INFO)
@@ -46,6 +47,8 @@ async def scenario() -> dict:
 def space_events() -> list[dict]:
     return SPACE_EVENTS
 
+
+app.include_router(space_router)  # before the static mount, which would otherwise catch /api/space/*
 
 if FRONTEND.exists():
     app.mount("/", StaticFiles(directory=FRONTEND, html=True), name="frontend")

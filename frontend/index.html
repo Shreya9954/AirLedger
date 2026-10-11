@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap">
 <link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/space.css">
 <script type="module" src="js/main.js"></script>
 </head>
 <body>
@@ -19,6 +20,7 @@
       <a href="#score">One score</a>
       <a href="#ledger">Airline ledger</a>
       <a href="#lab">Cloud or contrail</a>
+      <a href="#space">Space ledger</a>
       <a href="#data">Data</a>
     </nav>
     <div class="feed" id="feed"><b>●</b> LOADING…</div>
@@ -78,6 +80,7 @@
     <div class="body">
       <h2>Flights, launches and re-entries on a single climate scale</h2>
       <p>Every event is converted to tonnes of CO₂-equivalent over 100 years. Contrail energy forcing from pycontrails is divided by the absolute global warming potential of a tonne of CO₂. Rocket particles get their own term with wide uncertainty. The bars show the central estimate and the plausible range, on a log scale.</p>
+      <p class="note">The launch and re-entry rows here are illustrative: no published factor yet converts rocket soot, alumina or re-entry metal into CO₂-equivalent. The <a href="#space">space ledger</a> below shows what real launches and re-entries actually left in the upper atmosphere, in kilograms, from public catalogues.</p>
       <div class="formula">Impact<sub>tCO₂e,100</sub> = CO₂ from fuel + <em>EF<sub>contrail</sub> ÷ AGWP<sub>CO₂</sub></em> + stratospheric particle term</div>
       <div class="scorechart" id="scorechart"></div>
       <p class="readout" id="readout">Hover or focus a row for its assumptions.</p>
@@ -113,10 +116,63 @@
     </div>
   </section>
 
+  <section class="sheet" id="space">
+    <div class="margin"><span class="lbl">Space · catalogue data</span><span class="code">Space ledger</span></div>
+    <div class="body">
+      <h2>What launches and re-entering spacecraft leave in the upper atmosphere, and who put it there</h2>
+      <p class="sp-status" data-space-status role="status">Loading space data…</p>
+      <p>Launches, re-entries and masses come from public catalogues: Launch Library 2, CelesTrak and Jonathan McDowell’s GCAT. What they leave in the air is worked out from published rocket data and emission studies. Every number carries a tag saying how sure it is. Hover over or tab to a tag to see its range and source.</p>
+      <div class="sp-tiers" id="space-tiers"></div>
+      <div class="sp-kpis" id="space-kpis"></div>
+      <nav class="sp-subnav" aria-label="Space ledger sections"><a href="#sky">Layers of the sky</a><a href="#orbits">Orbits</a><a href="#space-ledger">Space ledgers</a><a href="#tradeoff">The trade-off</a></nav>
+    </div>
+  </section>
+
+  <section class="sheet" id="sky">
+    <div class="margin"><span class="lbl">Researchers · regulators</span><span class="code">Layers of the sky</span></div>
+    <div class="body">
+      <h2>Aircraft stay low. Rockets and re-entries reach layers nothing else does</h2>
+      <p>Each row is a 5-km slice of atmosphere, from the ground to 120 km. Aviation burns vastly more fuel, but almost all of it below 15 km, where rain washes particles out within weeks. Rockets put soot, alumina and chlorine straight into the stratosphere and above, and re-entering spacecraft vaporise in the mesosphere. Pick one substance at a time: they can’t be added together.</p>
+      <div id="sky-chart"></div>
+    </div>
+  </section>
+
+  <section class="sheet" id="orbits">
+    <div class="margin"><span class="lbl">Everyone</span><span class="code">Orbits</span></div>
+    <div class="body">
+      <h2>What is up there now, and what is about to come down</h2>
+      <p>A sample of the active catalogue, the space stations, and every object on CelesTrak’s list of orbits that are decaying. Triangles mark the pads that launched in the window. Drag the globe, or focus it and use the arrow keys, to turn it.</p>
+      <div id="orbit-globe"><p class="note">Loading orbits…</p></div>
+    </div>
+  </section>
+
+  <section class="sheet" id="space-ledger">
+    <div class="margin"><span class="lbl">Journalists · watchdogs</span><span class="code">Space ledgers</span></div>
+    <div class="body">
+      <h2>Who launched, and whose hardware came down</h2>
+      <p>Launch providers come from Launch Library 2; owners of re-entering objects come from GCAT. They are separate catalogues, so the two tables are kept apart: SpaceX the launch company and SpaceX’s Starlink division are different rows. Click a column heading to sort.</p>
+      <div id="space-ledgers"></div>
+    </div>
+  </section>
+
+  <section class="sheet" id="tradeoff">
+    <div class="margin"><span class="lbl">Regulators · researchers</span><span class="code">The trade-off</span></div>
+    <div class="body">
+      <h2>Built to burn up: safer on the ground, more metal in the sky</h2>
+      <p>Rules now make satellites in low orbit come down quickly. In 2022 the US Federal Communications Commission required the satellites it licenses to leave low orbit within five years of finishing their mission, down from a 25-year guideline. Satellites are also designed to burn up completely on the way down, so no debris reaches the ground.</p>
+      <p>That is safer for people below, but it puts the most metal into the upper atmosphere. In 2023 NOAA research aircraft found aluminium and other metals from re-entering spacecraft in about 10% of the sulphuric acid particles they sampled in the stratosphere. What that metal does to the ozone layer and the climate is still being studied.</p>
+      <p class="cite">FCC Second Report and Order on orbital debris, IB Docket 18-313, 29 September 2022 (<a href="https://www.satellitetoday.com/government-military/2022/09/30/fcc-adopts-5-year-rule-for-deorbiting-satellites/" rel="noopener" target="_blank">coverage</a>). Murphy et al. (2023), Metals from spacecraft reentry in stratospheric aerosol particles, <a href="https://doi.org/10.1073/pnas.2313374120" rel="noopener" target="_blank">PNAS 120, e2313374120</a>.</p>
+      <div id="tradeoff-chart"></div>
+      <h3 class="sp-h3">Sources for the space ledger</h3>
+      <div id="space-sources"></div>
+      <p class="note">Out of scope: predicting where re-entries land, modelling ozone or climate effects, and converting space emissions to CO₂-equivalents. The launch and re-entry figures in the contrail map and the one-score chart above are still illustrative placeholders.</p>
+    </div>
+  </section>
+
   <section class="sheet" id="data">
     <div class="margin"><span class="lbl">Build</span><span class="code">Data</span></div>
     <div class="body">
-      <h2>Five sources, one pipeline</h2>
+      <h2>Eight public sources</h2>
       <div style="overflow-x:auto">
         <table class="sources">
           <thead><tr><th>Source</th><th>What it gives us</th><th>Feeds</th></tr></thead>
@@ -126,6 +182,9 @@
             <tr><td>Google Research contrail datasets</td><td>Labelled satellite imagery (OpenContrails, GOES-16 ABI)</td><td>Evaluating the shape rule now; training a segmentation model later (not trained yet)</td></tr>
             <tr><td>Copernicus ERA5</td><td>Temperature, humidity and wind on pressure levels at cruise altitude</td><td>Ice-supersaturation layer, contrail drift</td></tr>
             <tr><td>pycontrails</td><td>CoCiP contrail model: formation, lifetime, energy forcing</td><td>Warming per flight, reroute options, the shared score</td></tr>
+            <tr><td>CelesTrak</td><td>Satellite catalogue, decay dates and current orbits</td><td>Space ledger: re-entries, the globe, objects about to come down</td></tr>
+            <tr><td>GCAT (J. McDowell)</td><td>Masses and owners of catalogued objects (CC-BY)</td><td>Space ledger: re-entered mass by owner</td></tr>
+            <tr><td>Launch Library 2</td><td>Launches, vehicles and liftoff masses</td><td>Space ledger: propellant and emissions by provider</td></tr>
           </tbody>
         </table>
       </div>

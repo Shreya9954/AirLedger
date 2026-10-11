@@ -1,0 +1,175 @@
+{
+  "schema": "space-summary/1",
+  "sample": true,
+  "generated_at": "2026-10-11T00:00:00Z",
+  "window": { "start": "2026-07-13", "end": "2026-10-11", "days": 90 },
+  "sources": [
+    { "id": "ll2", "name": "Launch Library 2 (The Space Devs)", "url": "https://thespacedevs.com/llapi", "licence": "The Space Devs terms of use", "retrieved_at": "2026-10-11T00:00:00Z" },
+    { "id": "celestrak", "name": "CelesTrak SATCAT and GP data (T.S. Kelso)", "url": "https://celestrak.org", "licence": "CelesTrak usage policy", "retrieved_at": "2026-10-11T00:00:00Z" },
+    { "id": "gcat", "name": "GCAT (J. McDowell)", "url": "https://planet4589.org/space/gcat", "licence": "CC-BY-4.0", "citation": "data from GCAT (J. McDowell, planet4589.org/space/gcat)", "retrieved_at": "2026-10-11T00:00:00Z" },
+    { "id": "sample", "name": "Illustrative sample values", "url": "", "licence": "", "retrieved_at": "2026-10-11T00:00:00Z" }
+  ],
+  "bins_km": [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120],
+  "regions": [
+    { "id": "troposphere", "name": "Troposphere", "lo_km": 0, "hi_km": 12 },
+    { "id": "stratosphere", "name": "Stratosphere", "lo_km": 12, "hi_km": 50 },
+    { "id": "mesosphere", "name": "Mesosphere", "lo_km": 50, "hi_km": 85 },
+    { "id": "thermosphere", "name": "Thermosphere", "lo_km": 85, "hi_km": 120 }
+  ],
+  "launches": [
+    {
+      "id": "ll2:00000000-0000-0000-0000-000000000001",
+      "name": "Falcon 9 Block 5 | Sample Mission",
+      "net": "2026-10-10T07:39:44Z",
+      "status": "success",
+      "provider": "SpaceX",
+      "country": "USA",
+      "vehicle": "Falcon 9 Block 5",
+      "vehicle_key": "falcon9",
+      "orbit": "LEO",
+      "pad": { "name": "Space Launch Complex 40", "location": "Cape Canaveral SFS, FL, USA", "lat": 28.5618, "lon": -80.577 },
+      "liftoff_mass": { "central": 549000, "low": 549000, "high": 549000, "unit": "kg", "tier": "fact", "source": "ll2", "note": "Published liftoff mass for this rocket configuration" },
+      "propellant": { "central": 500000, "low": 480000, "high": 515000, "unit": "kg", "tier": "estimate", "source": "sample" },
+      "deposits": {
+        "propellant": { "central": 500000, "low": 480000, "high": 515000, "unit": "kg", "tier": "estimate", "source": "sample" },
+        "black_carbon": { "central": 2000, "low": 600, "high": 6000, "unit": "kg", "tier": "research", "source": "sample" }
+      }
+    },
+    {
+      "id": "ll2:00000000-0000-0000-0000-000000000002",
+      "name": "Sample Rocket | Upcoming Sample Mission",
+      "net": "2026-10-14T12:00:00Z",
+      "status": "upcoming",
+      "provider": "Sample Launch Co",
+      "country": null,
+      "vehicle": "Sample Rocket",
+      "vehicle_key": null,
+      "orbit": "SSO",
+      "pad": { "name": "Sample Pad", "location": "Sample Site", "lat": 34.632, "lon": -120.611 },
+      "liftoff_mass": null,
+      "propellant": null,
+      "deposits": {}
+    }
+  ],
+  "reentries": [
+    {
+      "norad": 44235,
+      "cospar": "2019-029A",
+      "name": "STARLINK-SAMPLE",
+      "type": "PAY",
+      "operator": "SpaceX Starlink",
+      "operator_code": "SPXS",
+      "country": "US",
+      "launch_date": "2019-05-24",
+      "decay_date": "2026-09-20",
+      "landed": false,
+      "mass": { "central": 219, "low": 219, "high": 219, "unit": "kg", "tier": "fact", "source": "gcat" },
+      "deposits": {
+        "ablated_mass": { "central": 210, "low": 180, "high": 219, "unit": "kg", "tier": "estimate", "source": "sample" },
+        "aluminium": { "central": 60, "low": 35, "high": 90, "unit": "kg", "tier": "research", "source": "sample" }
+      }
+    },
+    {
+      "norad": 99999,
+      "cospar": "2026-000B",
+      "name": "SAMPLE R/B",
+      "type": "R/B",
+      "operator": "Sample Operator",
+      "operator_code": "SMPL",
+      "country": null,
+      "launch_date": "2026-08-01",
+      "decay_date": "2026-08-31",
+      "landed": false,
+      "mass": null,
+      "deposits": {}
+    },
+    {
+      "norad": 99998,
+      "cospar": "2026-000A",
+      "name": "SAMPLE CREW CAPSULE",
+      "type": "PAY",
+      "operator": "Sample Operator",
+      "operator_code": "SMPL",
+      "country": null,
+      "launch_date": "2026-06-01",
+      "decay_date": "2026-08-20",
+      "landed": true,
+      "mass": { "central": 9500, "low": 9500, "high": 9500, "unit": "kg", "tier": "fact", "source": "gcat" },
+      "deposits": {}
+    }
+  ],
+  "falling": [
+    {
+      "norad": 20453,
+      "cospar": "1990-008B",
+      "name": "DELTA 2 R/B(1)",
+      "type": "R/B",
+      "operator": "Sample Operator",
+      "operator_code": "SMPL",
+      "country": "US",
+      "perigee_km": 150.0,
+      "apogee_km": 175.0,
+      "epoch": "2026-10-10T12:00:00Z",
+      "mass": { "central": 920, "low": 920, "high": 920, "unit": "kg", "tier": "fact", "source": "sample", "note": "GCAT marks this mass as uncertain" }
+    }
+  ],
+  "ledger": {
+    "launch_providers": [
+      {
+        "provider": "SpaceX",
+        "country": "USA",
+        "launches": 1,
+        "launches_with_data": 1,
+        "propellant": { "central": 500000, "low": 480000, "high": 515000, "unit": "kg", "tier": "estimate", "source": "sample" },
+        "deposits": {
+          "propellant": { "central": 500000, "low": 480000, "high": 515000, "unit": "kg", "tier": "estimate", "source": "sample" },
+          "black_carbon": { "central": 2000, "low": 600, "high": 6000, "unit": "kg", "tier": "research", "source": "sample" }
+        }
+      }
+    ],
+    "reentry_owners": [
+      {
+        "operator": "SpaceX Starlink",
+        "operator_code": "SPXS",
+        "country": "US",
+        "reentries": 1,
+        "reentries_with_mass": 1,
+        "mass": { "central": 219, "low": 219, "high": 219, "unit": "kg", "tier": "fact", "source": "gcat" },
+        "deposits": {
+          "ablated_mass": { "central": 210, "low": 180, "high": 219, "unit": "kg", "tier": "estimate", "source": "sample" },
+          "aluminium": { "central": 60, "low": 35, "high": 90, "unit": "kg", "tier": "research", "source": "sample" }
+        }
+      },
+      {
+        "operator": "Sample Operator",
+        "operator_code": "SMPL",
+        "country": null,
+        "reentries": 1,
+        "reentries_with_mass": 0,
+        "mass": null,
+        "deposits": {}
+      }
+    ]
+  },
+  "layers": [
+    { "lo_km": 0, "hi_km": 5, "source": "launch", "species": "black_carbon", "value": { "central": 200, "low": 60, "high": 600, "unit": "kg", "tier": "research", "source": "sample" } },
+    { "lo_km": 15, "hi_km": 20, "source": "launch", "species": "black_carbon", "value": { "central": 400, "low": 120, "high": 1200, "unit": "kg", "tier": "research", "source": "sample" } },
+    { "lo_km": 30, "hi_km": 35, "source": "launch", "species": "black_carbon", "value": { "central": 400, "low": 120, "high": 1200, "unit": "kg", "tier": "research", "source": "sample" } },
+    { "lo_km": 70, "hi_km": 75, "source": "reentry", "species": "ablated_mass", "value": { "central": 105, "low": 90, "high": 110, "unit": "kg", "tier": "estimate", "source": "sample" } },
+    { "lo_km": 75, "hi_km": 80, "source": "reentry", "species": "ablated_mass", "value": { "central": 105, "low": 90, "high": 109, "unit": "kg", "tier": "estimate", "source": "sample" } },
+    { "lo_km": 10, "hi_km": 15, "source": "aviation", "species": "black_carbon", "value": { "central": 500, "low": 300, "high": 900, "unit": "kg", "tier": "research", "source": "sample" } }
+  ],
+  "monthly": [
+    { "month": "2026-08", "launches": 30, "reentries": 100, "reentries_with_mass": 96, "reentered_mass": { "central": 75000, "low": 75000, "high": 75000, "unit": "kg", "tier": "fact", "source": "gcat" } },
+    { "month": "2026-09", "launches": 32, "reentries": 110, "reentries_with_mass": 105, "reentered_mass": { "central": 80000, "low": 80000, "high": 80000, "unit": "kg", "tier": "fact", "source": "gcat" } },
+    { "month": "2026-10", "launches": 8, "reentries": 25, "reentries_with_mass": 0, "reentered_mass": null }
+  ],
+  "coverage": {
+    "launches": 2,
+    "launches_with_data": 1,
+    "reentries": 2,
+    "reentries_with_mass": 1,
+    "falling": 1,
+    "falling_with_mass": 1
+  }
+}

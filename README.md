@@ -69,6 +69,16 @@ cd backend
 .venv/bin/python -m pytest
 ```
 
+## Space ledger
+
+Below the contrail sections, the space ledger shows what real rocket launches and re-entering spacecraft leave in the upper atmosphere, by altitude, with who launched them and whose hardware came down. Every number is tagged Fact, Estimate or Research and links to its source. It needs no API keys.
+
+- **Data:** CelesTrak (satellite catalogue and orbits), GCAT (masses and owners) and Launch Library 2 (launches). Emission factors from Barker, Marais & McDowell (2024), *Scientific Data* 11, 1079; aviation comparison from Teoh et al. (2024), *ACP* 24, 725.
+- **Offline:** the page loads the API, then the committed snapshot in `frontend/data/space-snapshot.json` and `space-orbits.json`, then a labelled sample. Refresh the snapshot from `backend/` with `.venv/bin/python -m app.space.snapshot` (set `LL2_BASE_URL=https://lldev.thespacedevs.com/2.3.0` while developing; production Launch Library allows 15 requests an hour).
+- **Be polite to CelesTrak:** downloads are cached in `backend/.cache/space/`, and after any failure the code backs off that host for an hour. CelesTrak blocks addresses that retry.
+- **Licences:** data from GCAT (J. McDowell, planet4589.org/space/gcat), CC-BY. satellite.js 6.0.1 is vendored under its MIT licence in `frontend/js/space/vendor/`.
+- Data formats and sources in detail: [docs/space-ledger.md](docs/space-ledger.md).
+
 ## Live mode: what it needs
 
 | Source | Used for | Setup |

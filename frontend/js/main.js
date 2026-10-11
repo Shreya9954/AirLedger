@@ -10,6 +10,8 @@ import { initLedger } from './ui/ledger.js';
 import { initLab } from './ui/lab.js';
 
 const $ = id => document.getElementById(id);
+// Space ledger: loaded separately so a failure there never stops the contrail sections.
+import('./space/index.js').then(m => m.initSpace()).catch(err => console.error('Space ledger failed to load:', err));
 const sc = await loadScenario();
 
 $('feed').innerHTML = (sc.source === 'live' ? '<b>●</b> LIVE · ' : '<b>●</b> SIMULATED FEED · ') + sc.label;
