@@ -2,6 +2,7 @@
 import { AGWP_CO2, CO2_PER_FUEL, DELTAS, C0, C1, typeName } from '../config.js';
 import { fmt, sci, hhmm } from '../util.js';
 import { flightPos, inIssrAt } from '../model.js';
+import { recommendationFor } from './plan.js';
 
 const ft = d => (d > 0 ? '+' : d < 0 ? '−' : '±') + fmt(Math.abs(d) * 100) + ' ft';
 const signed = (n, d = 1) => (n >= 0 ? '+' : '−') + fmt(Math.abs(n), d);
@@ -32,6 +33,26 @@ export function createRail(el, sc, state) {
     const more = a.n_matched > 1 ? ` · ${a.n_matched} detections matched` : '';
     return `<div class="attrib">${kind} <b>${a.id}</b> at ${hhmm(a.observed_h, sc.startHour)} matched to this aircraft after wind advection.<br>
       <span class="mono">offset ${a.offset_km.toFixed(1)} km · contrail age ${a.age_min} min · confidence ${a.confidence.toFixed(2)}${more}</span></div>`;
+  }
+
+  // Where each number comes from: an observation, a forecast, or our model.
+  const TAG = { obs: 'Observed', fc: 'Forecast', model: 'Model', sim: 'Simulated' };
+  const tag = k => `<span class="src ${k}">${TAG[k]}</span>`;
+  const real = sc.source === 'real';
+  const ll = ([lon, lat]) => `${Math.abs(lat).toFixed(1)}°${lat >= 0 ? 'N' : 'S'} ${Math.abs(lon).toFixed(1)}°${lon >= 0 ? 'E' : 'W'}`;
+
+  function recommendation(f) {
+    const r = recommendationFor(f, sc);
+    if (!f.base.km && !(f.models && Object.values(f.models).some(m => m.base.km > 0))) return '';
+    if (!r) return `<div class="rec none"><b>No change recommended.</b> No altitude option has a positive net climate benefit${real ? ' under either forecast' : ''}.</div>`;
+    const conf = r.agree === null ? 'one simulated forecast' : r.agree ? 'both forecasts agree' : 'only one forecast favours it';
+    return `<div class="rec ${r.agree === false ? 'split' : ''}">
+      <span class="lbl">Recommended ${tag('model')}</span>
+      <b>${r.d > 0 ? 'Climb' : 'Descend'} ${fmt(Math.abs(r.d) * 100)} ft to FL${r.new_fl}</b>
+      from ${ll(r.from)} (${hhmm(r.from[2], sc.startHour)}) to ${ll(r.to)} (${hhmm(r.to[2], sc.startHour)}).
+      <div class="mono">net ${signed(r.net_mean)} tCO₂e (range ${signed(r.net_range[0])} to ${signed(r.net_range[1])}) · extra fuel ${fmt(r.extraCO2, 2)} t CO₂ · ${conf}</div>
+      <div class="muted" style="font-size:.76rem">A model estimate for a change not yet made, not a measured reduction.</div>
+    </div>`;
   }
 
   function reroute(f, co2) {
@@ -70,17 +91,20 @@ export function createRail(el, sc, state) {
       <div>
         <div class="lbl">Selected flight · click any aircraft</div>
         <div class="callsign">${f.cs}</div>
-        <div class="sub">${f.carrier.name} · ${typeName(f.type)}</div>
-        <div class="sub mono" style="font-size:.8rem">${f.o} → ${f.d} · FL${f.fl} · ${hhmm(f.dep, sc.startHour)}–${hhmm(f.arr, sc.startHour)}</div>
+        <div class="sub">${f.carrier.name} · ${f.type_known === false ? 'type unknown' : typeName(f.type)}</div>
+        <div class="sub mono" style="font-size:.8rem">${f.o === '—' ? `ICAO24 ${f.icao24}` : `${f.o} → ${f.d}`} · FL${f.fl} · ${hhmm(f.dep, sc.startHour)}–${hhmm(f.arr, sc.startHour)}</div>
         <div id="status" style="margin-top:8px">${statusText(f)}</div>
       </div>
       <dl class="kv">
-        <dt>Persistent contrail</dt><dd>${fmt(f.base.km)} km · ${fmt(100 * f.base.km / cruiseKm)}% of cruise</dd>
-        <dt>Energy forcing</dt><dd>${sci(f.base.ef)}</dd>
-        <dt>Contrail warming</dt><dd>${fmt(ct)} tCO₂e</dd>
-        <dt>Fuel CO₂</dt><dd>${fmt(co2)} t</dd>
+        <dt>Track & altitude ${tag(real ? 'obs' : 'sim')}</dt><dd>${real ? `${f.observed.points} ADS-B points` : 'simulated'}</dd>
+        <dt>Humidity & temperature ${tag(real ? 'fc' : 'sim')}</dt><dd>${real ? 'ECMWF, GFS' : 'simulated'}</dd>
+        <dt>Persistent contrail ${tag('model')}</dt><dd>${real ? `ECMWF ${fmt(f.models.ecmwf.base.km)} km · GFS ${fmt(f.models.gfs.base.km)} km` : `${fmt(f.base.km)} km · ${fmt(100 * f.base.km / cruiseKm)}% of cruise`}</dd>
+        <dt>Energy forcing ${tag('model')}</dt><dd>${sci(f.base.ef)}</dd>
+        <dt>Contrail warming ${tag('model')}</dt><dd>${fmt(ct)} tCO₂e</dd>
+        <dt>Fuel CO₂ ${tag('model')}</dt><dd>${fmt(co2)} t${f.type_known === false ? ' (type unknown)' : ''}</dd>
         <dt>Total impact</dt><dd><b>${fmt(co2 + ct)} tCO₂e</b></dd>
       </dl>
+      ${recommendation(f)}
       ${attribution(f)}
       <div class="reroute"><h3>Reroute this flight</h3>${reroute(f, co2)}</div>`;
 

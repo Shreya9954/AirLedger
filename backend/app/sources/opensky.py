@@ -88,13 +88,20 @@ class AircraftDatabase:
 
     def __init__(self, path: Path):
         self._rows: dict[str, tuple[str, str]] = {}
+        self._names: dict[str, str] = {}  # operator ICAO -> operator name, first one seen
         if path.exists():
             with path.open(newline="", encoding="utf-8", errors="replace") as fh:
                 for row in csv.DictReader(fh):
-                    self._rows[row.get("icao24", "").lower()] = (row.get("typecode", ""), row.get("operatoricao", ""))
+                    op = row.get("operatoricao", "")
+                    self._rows[row.get("icao24", "").lower()] = (row.get("typecode", ""), op)
+                    if op and row.get("operator") and op not in self._names:
+                        self._names[op] = row["operator"].strip()
 
     def lookup(self, icao24: str) -> tuple[str, str]:
         return self._rows.get(icao24.lower(), ("", ""))
+
+    def operator_name(self, operator_icao: str) -> str:
+        return self._names.get(operator_icao, "")
 
 
 def cruising_aircraft(client: OpenSkyClient, db: AircraftDatabase, bbox, at: int, limit: int,

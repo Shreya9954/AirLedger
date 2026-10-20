@@ -45,7 +45,15 @@ export async function loadScenario() {
       };
     }
   } catch (err) {
-    console.info('Backend unavailable, using simulated feed:', err.message);
+    console.info('Backend unavailable:', err.message);
+  }
+  if (feedPreference() === 'real') {
+    try {
+      const res = await fetch('data/real-night.json', { cache: 'no-cache' });
+      if (res.ok) return realNight(await res.json());
+    } catch (err) {
+      console.info('Real-night snapshot unavailable, using simulated feed:', err.message);
+    }
   }
   const startHour = 21, hours = 12, atmos = simAtmosphere(), flights = simFleet(atmos, startHour);
   return {
@@ -63,4 +71,23 @@ function simulatedAttribution(flights, atmos, hours) {
   for (const f of flights) f.attribution = best.get(f.id) ?? null;
   const correct = dets.filter(d => assigned.get(d.id) === d.source).length;
   return { total: dets.length, matched: assigned.size, correct, matchedFlights: best.size };
+}
+
+// Which feed the viewer picked: the real snapshot by default, or the simulation.
+const FEED_KEY = 'ual-feed';
+export function feedPreference() {
+  try { return localStorage.getItem(FEED_KEY) === 'sim' ? 'sim' : 'real'; } catch { return 'real'; }
+}
+export function setFeedPreference(v) {
+  try { localStorage.setItem(FEED_KEY, v); } catch { /* private mode: the toggle lasts for this load only */ }
+}
+
+// Observed tracks + forecast humidity, built offline by backend/app/pipeline/real_night.py.
+function realNight(sc) {
+  return {
+    source: 'real', label: sc.label, startHour: sc.start_hour, hours: sc.hours, t0: sc.t0_unix,
+    atmos: gridAtmosphere(sc.atmosphere), flights: sc.flights, space: sc.space_events,
+    detections: sc.observations == null ? null : { total: sc.observations, matchedFlights: sc.flights.filter(f => f.attribution).length },
+    provenance: sc.provenance, validation: sc.validation
+  };
 }

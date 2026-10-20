@@ -69,6 +69,24 @@ cd backend
 .venv/bin/python -m pytest
 ```
 
+## Real night (the default view)
+
+The site opens on a real window of North Atlantic traffic, built offline into `frontend/data/real-night.json` and committed, so it works without keys or a backend:
+
+- **Observed:** flight tracks from the OpenSky Network's public REST API, plus aircraft type and operator from its aircraft database.
+- **Forecast:** temperature, humidity over ice and wind at 300, 250 and 200 hPa from **ECMWF IFS** and **NOAA GFS**, via Open-Meteo (CC BY 4.0). Their humidity is reported relative to ice at cruise temperatures, capped at 100%; 95% or more counts as ice-saturated.
+- **Model:** a screening model (`backend/app/pipeline/screening.py`): the Schmidt–Appleman criterion (Schumann 1996) plus ice saturation, with illustrative warming per km. It runs separately under each forecast. Altitude options are priced with `reroute.py`, and a change is recommended when its net benefit is positive, ranked first by whether both forecasts agree.
+- **Validation:** the page reports how often the two forecasts agree where either predicts a persistent contrail (the real forecast uncertainty), ranges on every estimate, and the published 2023 Google/American Airlines/Breakthrough Energy trial. Satellite comparison runs only with `CONTRAILS_ORG_KEY`; otherwise the page says it was not checked.
+- **Fairness:** who benefits and who pays, whether changes move noise or pollution onto communities (all changes are at cruise altitude), and the limits of the data.
+
+Rebuild the snapshot from `backend/` (about 5 minutes; Open-Meteo's free tier limits requests per minute, and downloads are cached in `backend/.cache/realnight/`):
+
+```sh
+.venv/bin/python -m app.pipeline.real_night --fresh
+```
+
+The header button switches between the real night and the simulation.
+
 ## Space ledger
 
 Below the contrail sections, the space ledger shows what real rocket launches and re-entering spacecraft leave in the upper atmosphere, by altitude, with who launched them and whose hardware came down. Every number is tagged Fact, Estimate or Research and links to its source. It needs no API keys.

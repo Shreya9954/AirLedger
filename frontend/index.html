@@ -17,13 +17,17 @@
     <div class="mark">Upper <i>Air</i> Ledger</div>
     <nav aria-label="Sections">
       <a href="#map-sec">Contrail map</a>
+      <a href="#plan-sec">Plan</a>
+      <a href="#check-sec">Certainty</a>
+      <a href="#fair-sec">Fairness</a>
       <a href="#score">One score</a>
       <a href="#ledger">Airline ledger</a>
-      <a href="#lab">Cloud or contrail</a>
+      <a href="#lab">Lab</a>
       <a href="#space">Space ledger</a>
       <a href="#data">Data</a>
     </nav>
     <div class="feed" id="feed"><b>●</b> LOADING…</div>
+    <button class="btn ghost feedswitch" type="button" id="feedswitch" hidden></button>
   </div>
 </header>
 
@@ -68,6 +72,7 @@
         <span><i class="sw" style="background:var(--cool)"></i>Net-cooling contrail (daytime)</span>
         <span><i class="sw" style="background:var(--magenta);height:8px;width:8px"></i>Flight inside ISSR now</span>
         <span><i class="sw" style="background:var(--orbit);height:8px;width:8px;border-radius:50%"></i>Launch or re-entry</span>
+        <span data-mode="real" hidden><b>Tracks are observed</b> (OpenSky ADS-B). Humidity is the ECMWF forecast. Contrails are <b>predicted</b> by our screening model, not seen.</span>
       </div>
     </div>
     <aside class="rail" id="rail" aria-live="polite"></aside>
@@ -75,6 +80,32 @@
 </div>
 
 <div class="wrap">
+  <section class="sheet" id="plan-sec">
+    <div class="margin"><span class="lbl">Flight operations</span><span class="code">What to change</span></div>
+    <div class="body">
+      <h2>Which flights should change altitude, where, and what it buys</h2>
+      <p>Each row is one flight segment worth moving: the altitude change, why it is prioritised, the contrail warming it is expected to avoid, the extra fuel CO₂ it costs, and the net climate benefit.</p>
+      <div id="plan"></div>
+    </div>
+  </section>
+
+  <section class="sheet" id="check-sec">
+    <div class="margin"><span class="lbl">Regulators · researchers</span><span class="code">How sure</span></div>
+    <div class="body">
+      <h2>How sure are we, and what has actually been measured?</h2>
+      <p>Predictions are checked against a second forecast now and against satellite detections when a key is configured. Every reduction on this page is a model estimate; none has been measured.</p>
+      <div class="checks" id="checks"></div>
+    </div>
+  </section>
+
+  <section class="sheet" id="fair-sec">
+    <div class="margin"><span class="lbl">Fairness</span><span class="code">Who pays</span></div>
+    <div class="body">
+      <h2>Who benefits, who pays, and what the data can't see</h2>
+      <div id="fair"></div>
+    </div>
+  </section>
+
   <section class="sheet" id="score">
     <div class="margin"><span class="lbl">Regulators · researchers</span><span class="code">One score</span></div>
     <div class="body">
@@ -172,11 +203,12 @@
   <section class="sheet" id="data">
     <div class="margin"><span class="lbl">Build</span><span class="code">Data</span></div>
     <div class="body">
-      <h2>Eight public sources</h2>
+      <h2>Nine public sources</h2>
       <div style="overflow-x:auto">
         <table class="sources">
           <thead><tr><th>Source</th><th>What it gives us</th><th>Feeds</th></tr></thead>
           <tbody>
+            <tr><td>Open-Meteo</td><td>ECMWF IFS and NOAA GFS forecasts of temperature, humidity over ice and wind at 300, 250 and 200 hPa (CC BY 4.0)</td><td>Real-night humidity layer, contrail screening under two forecasts, forecast uncertainty</td></tr>
             <tr><td>OpenSky Network</td><td>Aircraft positions, altitudes, ICAO24 codes, and an aircraft database mapping each code to type and operator</td><td>Flight tracks; carrier and aircraft type for the ledger</td></tr>
             <tr><td>Contrails.org API</td><td>Contrail line segments detected in GOES-East satellite images every 10 minutes</td><td>Matching observed contrails to flights, which confirms or contradicts the model's predictions</td></tr>
             <tr><td>Google Research contrail datasets</td><td>Labelled satellite imagery (OpenContrails, GOES-16 ABI)</td><td>Evaluating the shape rule now; training a segmentation model later (not trained yet)</td></tr>
@@ -192,6 +224,7 @@
         <li data-mode="demo"><b>Everything on this page is simulated.</b> The humidity field, flights, carriers, satellite detections and space events are generated to show how the tool behaves.</li>
         <li data-mode="demo">Contrail formation assumes the Schmidt–Appleman criterion is met at every level above FL300, which is usually but not always true.</li>
         <li data-mode="demo">Energy forcing per km is a rough stand-in for CoCiP output: strong at night, weaker or net-cooling in midday sun, scaled by humidity and aircraft type.</li>
+        <li data-mode="real" hidden><b>Flight tracks are real; contrails are predicted.</b> Tracks come from OpenSky's public ADS-B data, humidity and temperature from the ECMWF and GFS forecasts. Contrail formation is a screening model (Schmidt–Appleman plus ice saturation) with illustrative warming per km, and satellite confirmation was not connected for this snapshot.</li>
         <li data-mode="live" hidden><b>Flights are real; their contrails are modeled.</b> Tracks and operators come from OpenSky, humidity and wind from ERA5, and contrail formation, lifetime and energy forcing from pycontrails CoCiP.</li>
         <li>AGWP<sub>CO₂</sub> over 100 years is taken as 1.48 × 10¹² J per tonne. Contrail efficacy is not applied.</li>
         <li>Rocket and re-entry values are illustrative placeholders. Black carbon and alumina in the stratosphere are not yet well quantified, which is why their ranges span an order of magnitude.</li>
